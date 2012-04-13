@@ -4,6 +4,11 @@ var io = require('socket.io');
 var app = express.createServer()
 , io = io.listen(app);
 
+io.configure(function () { 
+  io.set("transports", ["xhr-polling"]); 
+  io.set("polling duration", 10); 
+});
+
 app.register('.jade', require('jade'));
 app.set('view options', {
   layout: false
