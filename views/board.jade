@@ -45,7 +45,7 @@ html(lang="en")
         
         $(document).mouseup(mouseUp).mousedown(mouseDown)
         
-        var socket = io.connect('http://localhost');
+        var socket = io.connect();
         socket.emit('join', {board: "#{board}"})
         
         socket.on('draw', function(data){
