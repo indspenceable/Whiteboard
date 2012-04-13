@@ -18,7 +18,7 @@ app.get('/:board', function(req,res) {
   res.render('board.jade', {board: req.params.board});
 })
 
-app.listen(5656);
+app.listen(process.env.PORT || 5656);
 
 
 io.sockets.on('connection', function (socket) {
