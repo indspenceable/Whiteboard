@@ -1,0 +1,64 @@
+doctype 5
+html(lang="en")
+  head
+    title Whiteboard
+    script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js")
+    script(src="/socket.io/socket.io.js")
+    script
+      var drawing = false
+      var buffer = []
+      var context
+      var lastLocallyCapturedPoint
+      
+      
+      function mouseUp() {
+        drawing=false
+      }
+      function mouseDown() {
+        drawing = true
+      }
+      
+      function drawInLine(p) {
+        var xd = lastLocallyCapturedPoint[0]-p[0]
+        var yd = lastLocallyCapturedPoint[1]-p[1]
+        var steps = Math.abs(xd) + Math.abs(yd) / 5
+        for (var i = 0; i < steps; i++) {
+          var point = [p[0] + i*(xd) / steps, p[1] + i*(yd) / steps]
+          draw(point)
+          buffer.push(point)
+        }
+      }
+      function mouseMove(event) {
+        var point = [event.offsetX, event.offsetY]
+        if(drawing) {
+          drawInLine(point)
+        }
+        lastLocallyCapturedPoint = point
+      }
+      function draw(point) {
+        context.fillRect(point[0], point[1],5,5)
+      }
+      $(function() {
+        var canvas = $('canvas').mousemove(mouseMove)
+        context = canvas.get(0).getContext('2d')
+        context.fillStyle = '#000'
+        
+        $(document).mouseup(mouseUp).mousedown(mouseDown)
+        
+        var socket = io.connect('http://localhost');
+        socket.emit('join', {board: "#{board}"})
+        
+        socket.on('draw', function(data){
+          data.points.forEach(draw)
+        })
+        setInterval(function() {
+          if(buffer.length > 0) {
+            socket.emit('draw', {points: buffer})
+            buffer = []
+          }
+        }, 20)
+      })
+
+  body
+    h1 #{board}
+    canvas(width="500px", height="500px", style="border: 1px solid black")
