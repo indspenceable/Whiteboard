@@ -5,7 +5,9 @@ var express = require('express')
 
 // Set up the db
 var mongo = require('mongoskin');
-var db = mongo.db('mongodb://localhost:27017/test?auto_reconnect');
+var dbUrl = process.env.MONGOLAB_URI || 'mongodb://localhost:27017/test?auto_reconnect'
+
+var db = mongo.db(dbUrl);
 
 io.configure(function () { 
   io.set("transports", ["xhr-polling"]); 
