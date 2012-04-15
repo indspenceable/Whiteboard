@@ -5,6 +5,6 @@
     "express": "2.5.9",
     "socket.io": "0.9.5",
     "jade": "0.24.0",
-    "mongodb": "0.9.x"
+    "mongoskin": "0.9.x"
   }
 }
