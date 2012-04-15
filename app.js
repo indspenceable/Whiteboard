@@ -32,16 +32,8 @@ app.listen(process.env.PORT || 5656);
 
 function insertPoints(board, points) {
   points.forEach(function(rawPoint) {
-    //db.collection('points').save({x: point[0], y: point[1], board: board}, {upsert: true});
-    var point = {x: rawPoint[0], y: rawPoint[1], board: board}
-    console.log("Should be saving ", point)
+    var point = {x: Math.floor(rawPoint[0]), y: Math.floor(rawPoint[1]), board: board}
     db.collection('points').update(point,point,{upsert:true})
-    
-    // db.collection('points').find({x: point[0], y: point[0], board: board}).toArray(function(err,items) {
-    //   if (items.length == 0) {
-    //     db.collection('points').save({x: point[0], y: point[1], board: board}, {upsert: true});
-    //   }
-    // });
   });
 }
 

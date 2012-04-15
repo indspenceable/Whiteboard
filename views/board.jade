@@ -30,7 +30,7 @@ html(lang="en")
       }
       
       function mouseMove(event) {
-        var point = [event.offsetX, event.offsetY]
+        var point = [Math.floor(event.offsetX), Math.floor(event.offsetY)]
         if(drawing) {
           drawInLine(point)
         }
