@@ -28,8 +28,13 @@ html(lang="en")
           buffer.push(point)
         }
       }
+      
+      function mousePoint(event) {
+        return [Math.floor(event.offsetX), Math.floor(event.offsetY)]
+      }
+      
       function mouseMove(event) {
-        var point = [event.offsetX, event.offsetY]
+        var point = 
         if(drawing) {
           drawInLine(point)
         }
