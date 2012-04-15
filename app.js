@@ -1,12 +1,11 @@
-var express = require('express'),
-io = require('socket.io'),
-var app = express.createServer()
+var express = require('express')
+, io = require('socket.io')
+, app = express.createServer()
 , io = io.listen(app);
 
 // Set up the db
 var mongo = require('mongoskin');
-var db = mongo.db('mongodb://localhost:27017/yourdbname');
-db.createCollection('points');
+var db = mongo.db('mongodb://localhost:27017/test?auto_reconnect');
 
 io.configure(function () { 
   io.set("transports", ["xhr-polling"]); 
@@ -30,12 +29,18 @@ app.get('/:board', function(req,res) {
 app.listen(process.env.PORT || 5656);
 
 function insertPoints(board, points) {
-  points.forEach(function(point) {
-    if (db.collection('points').find({x: point[0], y: point[0], board: board}).length == 0) {
-      // Add it
-      db.collection('points').save({x: point[0], y: point[0], board: board})
-    }
-  })
+  points.forEach(function(rawPoint) {
+    //db.collection('points').save({x: point[0], y: point[1], board: board}, {upsert: true});
+    var point = {x: rawPoint[0], y: rawPoint[1], board: board}
+    console.log("Should be saving ", point)
+    db.collection('points').update(point,point,{upsert:true})
+    
+    // db.collection('points').find({x: point[0], y: point[0], board: board}).toArray(function(err,items) {
+    //   if (items.length == 0) {
+    //     db.collection('points').save({x: point[0], y: point[1], board: board}, {upsert: true});
+    //   }
+    // });
+  });
 }
 
 io.sockets.on('connection', function (socket) {
@@ -44,11 +49,15 @@ io.sockets.on('connection', function (socket) {
   socket.on('join', function(data) {
     socket.set('board', data.board)
     socket.join(data.board)
-    socket.emit('draw', {
-      points: db.collection('points').find({board: data.board}).map(function(pt) {
-        return [pt.x, pt.y]
+    var points = []
+    db.collection('points').find({board: data.board}).toArray(function(err, items) {
+      items.forEach(function(item) {
+        points.push([item.x, item.y])
       })
-    })
+      socket.emit('draw', {
+        points: points
+      })
+    });
   });
 
   // On a message, broadcast it to everyone in their board.
