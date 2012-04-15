@@ -7,7 +7,10 @@ html(lang="en")
     script
       var drawing = false
       var buffer = []
-      var context
+      var canvas
+      var context 
+      var canvasOffsetX
+      var canvasOffsetY
       var lastLocallyCapturedPoint
       
       
@@ -23,14 +26,14 @@ html(lang="en")
         var yd = lastLocallyCapturedPoint.y-p.y
         var steps = Math.abs(xd) + Math.abs(yd) / 5
         for (var i = 0; i < steps; i++) {
-          var point = {x:p.x + i*(xd) / steps, y:p.y + i*(yd) / steps}
+          var point = {x:Math.floor(p.x + i*(xd) / steps), y:Math.floor(p.y + i*(yd) / steps)}
           draw(point)
           buffer.push(point)
         }
       }
       
       function mouseMove(event) {
-        var point = {x:Math.floor(event.offsetX), y:Math.floor(event.offsetY)}
+        var point = {x:event.pageX - canvasOffsetX, y:event.pageY - canvasOffsetY}
         if(drawing) {
           drawInLine(point)
         }
@@ -40,11 +43,13 @@ html(lang="en")
         context.fillRect(point.x, point.y,5,5)
       }
       $(function() {
-        var canvas = $('canvas').mousemove(mouseMove)
+        canvas = $('canvas')
+        canvasOffsetX = canvas.offset().left
+        canvasOffsetY = canvas.offset().top
         context = canvas.get(0).getContext('2d')
         context.fillStyle = '#000'
         
-        $(document).mouseup(mouseUp).mousedown(mouseDown)
+        $(document).mouseup(mouseUp).mousedown(mouseDown).mousemove(mouseMove)
         
         var socket = io.connect();
         socket.emit('join', {board: "#{board}"})
