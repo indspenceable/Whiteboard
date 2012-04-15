@@ -29,12 +29,8 @@ html(lang="en")
         }
       }
       
-      function mousePoint(event) {
-        return [Math.floor(event.offsetX), Math.floor(event.offsetY)]
-      }
-      
       function mouseMove(event) {
-        var point = mousePoint(event)
+        var point = [event.offsetX, event.offsetY]
         if(drawing) {
           drawInLine(point)
         }
