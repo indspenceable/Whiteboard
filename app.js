@@ -32,7 +32,7 @@ app.listen(process.env.PORT || 5656);
 
 function insertPoints(board, points) {
   points.forEach(function(rawPoint) {
-    var point = {x: Math.floor(rawPoint[0]), y: Math.floor(rawPoint[1]), board: board}
+    var point = {x: Math.floor(rawPoint.x), y: Math.floor(rawPoint.y), board: board}
     db.collection('points').update(point,point,{upsert:true})
   });
 }
@@ -44,10 +44,7 @@ io.sockets.on('connection', function (socket) {
     socket.set('board', data.board)
     socket.join(data.board)
     var points = []
-    db.collection('points').find({board: data.board}).toArray(function(err, items) {
-      items.forEach(function(item) {
-        points.push([item.x, item.y])
-      })
+    db.collection('points').find({board: data.board}).toArray(function(err, points) {
       socket.emit('draw', {
         points: points
       })

@@ -19,25 +19,25 @@ html(lang="en")
       }
       
       function drawInLine(p) {
-        var xd = lastLocallyCapturedPoint[0]-p[0]
-        var yd = lastLocallyCapturedPoint[1]-p[1]
+        var xd = lastLocallyCapturedPoint.x-p.x
+        var yd = lastLocallyCapturedPoint.y-p.y
         var steps = Math.abs(xd) + Math.abs(yd) / 5
         for (var i = 0; i < steps; i++) {
-          var point = [p[0] + i*(xd) / steps, p[1] + i*(yd) / steps]
+          var point = {x:p.x + i*(xd) / steps, y:p.y + i*(yd) / steps}
           draw(point)
           buffer.push(point)
         }
       }
       
       function mouseMove(event) {
-        var point = [Math.floor(event.offsetX), Math.floor(event.offsetY)]
+        var point = {x:Math.floor(event.offsetX), y:Math.floor(event.offsetY)}
         if(drawing) {
           drawInLine(point)
         }
         lastLocallyCapturedPoint = point
       }
       function draw(point) {
-        context.fillRect(point[0], point[1],5,5)
+        context.fillRect(point.x, point.y,5,5)
       }
       $(function() {
         var canvas = $('canvas').mousemove(mouseMove)
