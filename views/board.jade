@@ -81,10 +81,14 @@ html(lang="en")
         $(document).mouseup(mouseUp).mousedown(mouseDown).mousemove(mouseMove)
         $('.mode').click(function() {
           if (mode == 'drawing') {
-            $(this).text("Erasing")
+            $('.draw').hide(500, function() {
+              $('.erase').show(500)
+            })
             mode = 'erasing'
           } else {
-            $(this).text("Drawing")
+            $('.erase').hide(500, function() {
+              $('.draw').show(500)
+            })
             mode = 'drawing'
           }
         })
@@ -122,7 +126,10 @@ html(lang="en")
     .container
       h1 #{title}
       .canvas(style="display: none")
-        .mode Drawing
+        .mode
+          span.draw Drawing
+          span.erase(style="display:none") Erasing
+          &nbsp;
         canvas(width="940px", height="500px", style="border: 1px solid black")
       .loading
         | Please wait, your whiteboard is getting set up...
