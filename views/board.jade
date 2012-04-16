@@ -2,6 +2,8 @@ doctype 5
 html(lang="en")
   head
     title Whiteboard
+    link(rel="stylesheet", type="text/css", href="bootstrap.min.css")
+    link(rel="stylesheet", type="text/css", href="whiteboard.css")
     script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js")
     script(src="/socket.io/socket.io.js")
     script
@@ -87,8 +89,8 @@ html(lang="en")
         socket.emit('join', {board: "#{board}"})
         
         socket.on('draw', function(data){
-          data.points.forEach(draw)
           showCanvas();
+          data.points.forEach(draw)
         })
         socket.on('erase', function(data){
           data.points.forEach(erase)
@@ -106,6 +108,11 @@ html(lang="en")
       })
 
   body
-    h1 #{board}
-    .mode Drawing
-    canvas(width="500px", height="500px", style="border: 1px solid black")
+    .navbar.navbar-fixed-top
+      .navbar-inner
+        .container
+          a.brand(href="/") Whiteboard
+    .container
+      h1 #{board}
+      .mode Drawing
+      canvas(width="940px", height="500px", style="border: 1px solid black; display: none")

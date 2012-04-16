@@ -3,6 +3,7 @@ var express = require('express')
 , app = express.createServer()
 , io = io.listen(app);
 io.set('log level', 1);
+app.use(express.static("./public"))
 // Set up the db
 var mongo = require('mongoskin');
 var dbUrl = process.env.MONGOLAB_URI || 'mongodb://localhost:27017/test?auto_reconnect'
@@ -25,7 +26,7 @@ app.get('/', function(req,res) {
 });
 // /(board) to that board.
 app.get('/:board', function(req,res) {
-  res.render('board.jade', {board: req.params.board});
+  res.render('board.jade', {board: req.params.board.replace(/^\w/, function($0) { return $0.toUpperCase(); })});
 })
 
 app.listen(process.env.PORT || 5656);
