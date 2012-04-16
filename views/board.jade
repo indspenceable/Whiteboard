@@ -60,28 +60,32 @@ html(lang="en")
         context.fillRect(point.x-RAD/2, point.y-RAD/2,RAD,RAD)
       }
       
-      function showCanvas() {
-        canvas.show()
-        canvasOffsetX = canvas.offset().left
-        canvasOffsetY = canvas.offset().top
-        shown = true
+      function showCanvas(points) {
+        $('.loading').hide(1000, function(){
+          $('.canvas').show(1000)
+          canvasOffsetX = canvas.offset().left
+          canvasOffsetY = canvas.offset().top
+          shown = true
+          context.fillStyle = '#fff'
+          context.fillRect(0,0, canvas.width(), canvas.height());
+          points.forEach(draw)
+        })
       }
       
       $(function() {
         canvas = $('canvas')
         canvasOffsetX = 0
         canvasOffsetY = 0
-        context = canvas.get(0).getContext('2d')
-        context.fillStyle = '#000'
+        context = canvas.get(0).getContext('2d');
         
         $(document).mouseup(mouseUp).mousedown(mouseDown).mousemove(mouseMove)
         $('.mode').click(function() {
           if (mode == 'drawing') {
-            $(this).text("erasing")
-            mode = 'Erasing'
+            $(this).text("Erasing")
+            mode = 'erasing'
           } else {
-            $(this).text("drawing")
-            mode = 'Drawing'
+            $(this).text("Drawing")
+            mode = 'drawing'
           }
         })
         
@@ -89,8 +93,11 @@ html(lang="en")
         socket.emit('join', {board: "#{board}"})
         
         socket.on('draw', function(data){
-          showCanvas();
-          data.points.forEach(draw)
+          if (shown) {
+            data.points.forEach(draw)
+          } else {
+            showCanvas(data.points);
+          }
         })
         socket.on('erase', function(data){
           data.points.forEach(erase)
@@ -113,6 +120,9 @@ html(lang="en")
         .container
           a.brand(href="/") Whiteboard
     .container
-      h1 #{board}
-      .mode Drawing
-      canvas(width="940px", height="500px", style="border: 1px solid black; display: none")
+      h1 #{title}
+      .canvas(style="display: none")
+        .mode Drawing
+        canvas(width="940px", height="500px", style="border: 1px solid black")
+      .loading
+        | Please wait, your whiteboard is getting set up...

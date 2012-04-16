@@ -1,3 +1,10 @@
 body {
-  padding-top: 40px
+  padding-top: 60px;
+  background-image: url(http://subtlepatterns.com/patterns/frenchstucco.png);
+}
+canvas {
+  cursor: default;
+}
+.centered {
+  text-align: center;
 }

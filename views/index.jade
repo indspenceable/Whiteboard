@@ -1,0 +1,33 @@
+doctype 5
+html(lang="en")
+  head
+    title Whiteboard
+    link(rel="stylesheet", type="text/css", href="bootstrap.min.css")
+    link(rel="stylesheet", type="text/css", href="whiteboard.css")
+    script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js")
+    script
+      $(function(){
+        $('.js-new-board').click(function() {
+          window.location = Math.random().toString(36).substring(2)
+        })
+        $('.js-existing-board').keypress(function(event){
+          console.log(event)
+          if (event.keyCode == 13) {
+            window.location = $(this).val();
+          }
+        })
+      })
+  body
+    .navbar.navbar-fixed-top
+      .navbar-inner
+        .container
+          a.brand(href="/") Whiteboard
+    .container
+      .hero-unit
+        h1 Whiteboard
+        p Collaborate visually in real-time.
+        p 
+          a.btn.btn-primary.btn-large.js-new-board Make a new board »
+      .centered
+          | Or, Join an existing board: 
+          input.js-existing-board(type="text")        

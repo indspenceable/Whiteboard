@@ -9,6 +9,7 @@ var mongo = require('mongoskin');
 var dbUrl = process.env.MONGOLAB_URI || 'mongodb://localhost:27017/test?auto_reconnect'
 
 var db = mongo.db(dbUrl);
+db.collection('points').ensureIndex({board:1});
 
 io.configure(function () { 
   io.set("transports", ["xhr-polling"]); 
@@ -26,35 +27,39 @@ app.get('/', function(req,res) {
 });
 // /(board) to that board.
 app.get('/:board', function(req,res) {
-  res.render('board.jade', {board: req.params.board.replace(/^\w/, function($0) { return $0.toUpperCase(); })});
+  var title = req.params.board
+  title = title.charAt(0).toUpperCase() + title.slice(1);
+  res.render('board.jade', {board: req.params.board, title: title});
 })
 
 app.listen(process.env.PORT || 5656);
 
-function insertPoints(board, points) {
-  points.forEach(function(rawPoint) {
-    var point = {x: Math.floor(rawPoint.x), y: Math.floor(rawPoint.y), board: board}
-    db.collection('points').update(point,point,{upsert:true})
-  });
-}
-function removePoints(board, points) {
-  points.forEach(function(rawPoint) {
-    var point = {x: Math.floor(rawPoint.x), y: Math.floor(rawPoint.y), board: board}
-    db.collection('points').remove({x:{'$lt': point.x+2, '$gt': point.x-2}, y:{'$lt': point.y+2,'$gt': point.y-2}, board: board})
+function insertPoints(board, rawPoints) {
+  var points = rawPoints.map(function(rawPoint){
+    return {x: Math.floor(rawPoint.x), y: Math.floor(rawPoint.y), board: board}
   })
+  db.collection('points').remove(points)
+  db.collection('points').save(points)
+}
+function removePoints(board, rawPoints) {
+  rawPoints.forEach(function(rawPoint){
+    var x = Math.floor(rawPoint.x)
+    var y = Math.floor(rawPoint.y)
+    db.collection('points').remove({x: {$lt: x+2, $gt: x-2}, y:{$lt: y+2, $gt: y-2}, board: board})
+  })
+  
 }
 
 io.sockets.on('connection', function (socket) {
   // on a join, add them to the right board and save that 
   // property on their socket.
   socket.on('join', function(data) {
-    socket.set('board', data.board)
-    socket.join(data.board)
-    var points = []
     db.collection('points').find({board: data.board}).toArray(function(err, points) {
       socket.emit('draw', {
         points: points
       })
+      socket.set('board', data.board)
+      socket.join(data.board)
     });
   });
 
