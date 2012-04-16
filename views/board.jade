@@ -106,6 +106,16 @@ html(lang="en")
         socket.on('erase', function(data){
           data.points.forEach(erase)
         })
+        socket.on('clear', function(data) {
+          context.fillStyle = '#fff'
+          context.fillRect(0,0, canvas.width(), canvas.height());
+        })
+        $('.js-clear').click(function() {
+          socket.emit('clear', {})
+          context.fillStyle = '#fff'
+          context.fillRect(0,0, canvas.width(), canvas.height());
+        })
+        
         setInterval(function() {
           if(drawBuffer.length > 0) {
             socket.emit('draw', {points: drawBuffer})
@@ -126,10 +136,11 @@ html(lang="en")
     .container
       h1 #{title}
       .canvas(style="display: none")
-        .mode
+        .mode(style="display: none")
           span.draw Drawing
           span.erase(style="display:none") Erasing
           &nbsp;
         canvas(width="940px", height="500px", style="border: 1px solid black")
+        a.btn.btn-danger.js-clear Clear
       .loading
         | Please wait, your whiteboard is getting set up...

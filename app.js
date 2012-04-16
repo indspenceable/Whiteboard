@@ -46,8 +46,10 @@ function removePoints(board, rawPoints) {
     var x = Math.floor(rawPoint.x)
     var y = Math.floor(rawPoint.y)
     db.collection('points').remove({x: {$lt: x+2, $gt: x-2}, y:{$lt: y+2, $gt: y-2}, board: board})
-  })
-  
+  }) 
+}
+function removeAllPoints(board) {
+  db.collection('points').remove({board: board})
 }
 
 io.sockets.on('connection', function (socket) {
@@ -74,6 +76,12 @@ io.sockets.on('connection', function (socket) {
     socket.get('board', function(err, board){
       removePoints(board,data.points)
       socket.broadcast.to(board).emit('erase', data)
+    })
+  })
+  socket.on('clear', function(data) {
+    socket.get('board', function(err, board){
+      removeAllPoints(board)
+      socket.broadcast.to(board).emit('clear', data)
     })
   })
 });
