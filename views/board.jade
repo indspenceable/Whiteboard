@@ -6,13 +6,15 @@ html(lang="en")
     script(src="/socket.io/socket.io.js")
     script
       var drawing = false
-      var buffer = []
+      var drawBuffer = []
+      var eraseBuffer = []
+      
       var canvas
       var context 
       var canvasOffsetX
       var canvasOffsetY
       var lastLocallyCapturedPoint
-      
+      var mode = 'drawing'
       
       function mouseUp() {
         drawing=false
@@ -26,9 +28,16 @@ html(lang="en")
         var yd = lastLocallyCapturedPoint.y-p.y
         var steps = Math.abs(xd) + Math.abs(yd) / 5
         for (var i = 0; i < steps; i++) {
-          var point = {x:Math.floor(p.x + i*(xd) / steps), y:Math.floor(p.y + i*(yd) / steps)}
-          draw(point)
-          buffer.push(point)
+          if (mode == 'drawing') {
+            var point = {x:Math.floor(p.x + i*(xd) / steps), y:Math.floor(p.y + i*(yd) / steps)}
+            draw(point)
+            drawBuffer.push(point)
+          } else {
+            var point = {x:Math.floor(p.x + i*(xd) / steps), y:Math.floor(p.y + i*(yd) / steps)}
+            console.log(point)
+            erase(point)
+            eraseBuffer.push(point)
+          }
         }
       }
       
@@ -39,8 +48,14 @@ html(lang="en")
         }
         lastLocallyCapturedPoint = point
       }
+      var RAD = 5
       function draw(point) {
-        context.fillRect(point.x, point.y,5,5)
+        context.fillStyle = '#000'
+        context.fillRect(point.x-RAD/2, point.y-RAD/2,RAD,RAD)
+      }
+      function erase(point) {
+        context.fillStyle = '#fff'
+        context.fillRect(point.x-RAD/2, point.y-RAD/2,RAD,RAD)
       }
       $(function() {
         canvas = $('canvas')
@@ -50,6 +65,15 @@ html(lang="en")
         context.fillStyle = '#000'
         
         $(document).mouseup(mouseUp).mousedown(mouseDown).mousemove(mouseMove)
+        $('.mode').click(function() {
+          if (mode == 'drawing') {
+            $(this).text("erasing")
+            mode = 'erasing'
+          } else {
+            $(this).text("drawing")
+            mode = 'drawing'
+          }
+        })
         
         var socket = io.connect();
         socket.emit('join', {board: "#{board}"})
@@ -57,14 +81,22 @@ html(lang="en")
         socket.on('draw', function(data){
           data.points.forEach(draw)
         })
+        socket.on('erase', function(data){
+          data.points.forEach(erase)
+        })
         setInterval(function() {
-          if(buffer.length > 0) {
-            socket.emit('draw', {points: buffer})
-            buffer = []
+          if(drawBuffer.length > 0) {
+            socket.emit('draw', {points: drawBuffer})
+            drawBuffer = []
+          }
+          if (eraseBuffer.length > 0) {
+            socket.emit('erase', {points: eraseBuffer})
+            eraseBuffer = []
           }
         }, 20)
       })
 
   body
     h1 #{board}
+    .mode Drawing
     canvas(width="500px", height="500px", style="border: 1px solid black")

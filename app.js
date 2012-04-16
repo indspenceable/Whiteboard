@@ -2,7 +2,7 @@ var express = require('express')
 , io = require('socket.io')
 , app = express.createServer()
 , io = io.listen(app);
-
+io.set('log level', 1);
 // Set up the db
 var mongo = require('mongoskin');
 var dbUrl = process.env.MONGOLAB_URI || 'mongodb://localhost:27017/test?auto_reconnect'
@@ -36,6 +36,13 @@ function insertPoints(board, points) {
     db.collection('points').update(point,point,{upsert:true})
   });
 }
+function removePoints(board, points) {
+  points.forEach(function(rawPoint) {
+    console.log("REMOVING POINTS:", rawPoint)
+    var point = {x: Math.floor(rawPoint.x), y: Math.floor(rawPoint.y), board: board}
+    db.collection('points').remove({x:{'$lt': point.x+2,'$gt': point.x-2}, y:{'$lt': point.y+2,'$gt': point.y-2}, board: board})
+  })
+}
 
 io.sockets.on('connection', function (socket) {
   // on a join, add them to the right board and save that 
@@ -56,6 +63,12 @@ io.sockets.on('connection', function (socket) {
     socket.get('board', function(err, board){
       insertPoints(board,data.points)
       socket.broadcast.to(board).emit('draw', data)
+    })
+  })
+  socket.on('erase', function(data) {
+    socket.get('board', function(err, board){
+      removePoints(board,data.points)
+      socket.broadcast.to(board).emit('erase', data)
     })
   })
 });
