@@ -15,6 +15,7 @@ html(lang="en")
       var canvasOffsetY
       var lastLocallyCapturedPoint
       var mode = 'drawing'
+      var shown = false
       
       function mouseUp() {
         drawing=false
@@ -34,7 +35,6 @@ html(lang="en")
             drawBuffer.push(point)
           } else {
             var point = {x:Math.floor(p.x + i*(xd) / steps), y:Math.floor(p.y + i*(yd) / steps)}
-            console.log(point)
             erase(point)
             eraseBuffer.push(point)
           }
@@ -43,7 +43,7 @@ html(lang="en")
       
       function mouseMove(event) {
         var point = {x:event.pageX - canvasOffsetX, y:event.pageY - canvasOffsetY}
-        if(drawing) {
+        if(drawing && shown) {
           drawInLine(point)
         }
         lastLocallyCapturedPoint = point
@@ -57,10 +57,18 @@ html(lang="en")
         context.fillStyle = '#fff'
         context.fillRect(point.x-RAD/2, point.y-RAD/2,RAD,RAD)
       }
-      $(function() {
-        canvas = $('canvas')
+      
+      function showCanvas() {
+        canvas.show()
         canvasOffsetX = canvas.offset().left
         canvasOffsetY = canvas.offset().top
+        shown = true
+      }
+      
+      $(function() {
+        canvas = $('canvas')
+        canvasOffsetX = 0
+        canvasOffsetY = 0
         context = canvas.get(0).getContext('2d')
         context.fillStyle = '#000'
         
@@ -68,10 +76,10 @@ html(lang="en")
         $('.mode').click(function() {
           if (mode == 'drawing') {
             $(this).text("erasing")
-            mode = 'erasing'
+            mode = 'Erasing'
           } else {
             $(this).text("drawing")
-            mode = 'drawing'
+            mode = 'Drawing'
           }
         })
         
@@ -80,6 +88,7 @@ html(lang="en")
         
         socket.on('draw', function(data){
           data.points.forEach(draw)
+          showCanvas();
         })
         socket.on('erase', function(data){
           data.points.forEach(erase)

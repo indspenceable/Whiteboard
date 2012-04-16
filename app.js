@@ -38,9 +38,8 @@ function insertPoints(board, points) {
 }
 function removePoints(board, points) {
   points.forEach(function(rawPoint) {
-    console.log("REMOVING POINTS:", rawPoint)
     var point = {x: Math.floor(rawPoint.x), y: Math.floor(rawPoint.y), board: board}
-    db.collection('points').remove({x:{'$lt': point.x+2,'$gt': point.x-2}, y:{'$lt': point.y+2,'$gt': point.y-2}, board: board})
+    db.collection('points').remove({x:{'$lt': point.x+2, '$gt': point.x-2}, y:{'$lt': point.y+2,'$gt': point.y-2}, board: board})
   })
 }
 
