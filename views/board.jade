@@ -99,6 +99,7 @@ html(lang="en")
         socket.emit('join', {board: "#{board}"})
         
         socket.on('draw', function(data){
+          console.log('draw',data)
           showCanvas();
           data.points.forEach(draw)
         })
