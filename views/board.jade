@@ -71,8 +71,7 @@ html(lang="en")
         context.fillRect(0,0, 940, 500);
         points.forEach(draw)
         $('.loading').hide(1000, function(){
-          $('.canvas').show(1000)
-          windowResize()
+          $('.canvas').show(1000, windowResize)
         })
       }
       
