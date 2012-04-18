@@ -83,7 +83,16 @@ html(lang="en")
         context = canvas.get(0).getContext('2d');
         
         $(document).mouseup(mouseUp).mousedown(mouseDown).mousemove(mouseMove)
-        $('.mode').click(function() {
+        $('.js-draw').click(function() {
+          $(this).addClass('active').siblings().removeClass('active')
+          mode = 'drawing'
+        })
+        $('.js-erase').click(function(){
+          $(this).addClass('active').siblings().removeClass('active')
+          mode = 'erasing'
+        })
+        
+        $('.js-mode-toggle').click(function() {
           if (mode == 'drawing') {
             $('.draw').hide(500, function() {
               $('.erase').show(500)
@@ -140,11 +149,10 @@ html(lang="en")
     .container
       h1 #{title}
       .canvas(style="display: none")
-        .mode
-          span.draw Drawing
-          span.erase(style="display:none") Erasing
-          &nbsp;
+        p
+          .btn-group
+            a.btn.js-draw.btn-success.active(href='#') Draw
+            a.btn.js-erase.btn-danger(href='#') Erase
         canvas(width="940px", height="500px", style="border: 1px solid black")
-        a.btn.btn-danger.js-clear Clear
       .loading
         | Please wait, your whiteboard is getting set up...

@@ -66,6 +66,9 @@ io.sockets.on('connection', function (socket) {
   // property on their socket.
   socket.on('join', function(data) {
     db.collection('boards').find({name: data.board}).toArray(function(err, actions) {
+      if (actions.length == 0) {
+        socket.emit('draw', {points:[]})
+      }
       actions.forEach(function(action) {
         socket.emit(action.verb, {
           points: action.points
