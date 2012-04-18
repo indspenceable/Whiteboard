@@ -71,7 +71,7 @@ html(lang="en")
         context.fillRect(0,0, 940, 500);
         points.forEach(draw)
         $('.loading').hide(1000, function(){
-          $('.canvas').show(1000, windowResize)
+          $('.canvas').show(1000,   windowResize)
         })
       }
       
@@ -82,6 +82,7 @@ html(lang="en")
         context = canvas.get(0).getContext('2d');
         
         $(document).mouseup(mouseUp).mousedown(mouseDown).mousemove(mouseMove)
+        $(window).scroll(mouseMove)
         $('.js-draw').click(function() {
           $(this).addClass('active').siblings().removeClass('active')
           mode = 'drawing'
