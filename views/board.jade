@@ -29,7 +29,7 @@ html(lang="en")
       function drawInLine(p) {
         var xd = lastLocallyCapturedPoint.x-p.x
         var yd = lastLocallyCapturedPoint.y-p.y
-        var steps = Math.abs(xd) + Math.abs(yd) / 5
+        var steps = Math.abs(xd) + Math.abs(yd) / DRAW_SIZE
         for (var i = 0; i < steps; i++) {
           if (mode == 'drawing') {
             var point = {x:Math.floor(p.x + i*(xd) / steps), y:Math.floor(p.y + i*(yd) / steps)}
@@ -50,14 +50,16 @@ html(lang="en")
         }
         lastLocallyCapturedPoint = point
       }
-      var RAD = 5
+      
+      var DRAW_SIZE = 5
       function draw(point) {
         context.fillStyle = '#000'
-        context.fillRect(point.x-RAD/2, point.y-RAD/2,RAD,RAD)
+        context.fillRect(point.x-DRAW_SIZE/2, point.y-DRAW_SIZE/2,DRAW_SIZE,DRAW_SIZE)
       }
+      var ERASE_SIZE = 10
       function erase(point) {
         context.fillStyle = '#fff'
-        context.fillRect(point.x-RAD/2, point.y-RAD/2,RAD,RAD)
+        context.fillRect(point.x-ERASE_SIZE/2, point.y-ERASE_SIZE/2,ERASE_SIZE,ERASE_SIZE)
       }
       function windowResize() {
         canvasOffsetX = canvas.offset().left
