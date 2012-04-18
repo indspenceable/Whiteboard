@@ -68,13 +68,14 @@ html(lang="en")
       $(window).resize(windowResize);
       
       function showCanvas(points) {
-        shown = true
-        context.fillStyle = '#fff'
-        context.fillRect(0,0, 940, 500);
-        points.forEach(draw)
-        $('.loading').hide(1000, function(){
-          $('.canvas').show(1000,   windowResize)
-        })
+        if (shown == false) {
+          shown = true
+          context.fillStyle = '#fff'
+          context.fillRect(0,0, 940, 500);
+          $('.loading').hide(1000, function(){
+            $('.canvas').show(1000,   windowResize)
+          })
+        }
       }
       
       $(function() {
@@ -94,31 +95,16 @@ html(lang="en")
           mode = 'erasing'
         })
         
-        $('.js-mode-toggle').click(function() {
-          if (mode == 'drawing') {
-            $('.draw').hide(500, function() {
-              $('.erase').show(500)
-            })
-            mode = 'erasing'
-          } else {
-            $('.erase').hide(500, function() {
-              $('.draw').show(500)
-            })
-            mode = 'drawing'
-          }
-        })
-        
         var socket = io.connect();
         socket.emit('join', {board: "#{board}"})
         
         socket.on('draw', function(data){
-          if (shown) {
-            data.points.forEach(draw)
-          } else {
-            showCanvas(data.points);
-          }
+          showCanvas();
+          data.points.forEach(draw)
         })
         socket.on('erase', function(data){
+          console.log("erase", data)
+          showCanvas()  
           data.points.forEach(erase)
         })
         socket.on('clear', function(data) {
