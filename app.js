@@ -43,7 +43,7 @@ function updateLatestEntry(board, rawPoints, verb) {
     return {x: Math.floor(rawPoint.x), y: Math.floor(rawPoint.y)}
   })
   // Find the latest action on the db
-  db.collection('boards').find({name: board}).sort({time: 1}).limit(1).nextObject(function(err,mostRecentAction) {
+  db.collection('boards').find({name: board}).sort({time: -1}).limit(1).nextObject(function(err,mostRecentAction) {
     if (mostRecentAction && mostRecentAction.verb == verb) {
       db.collection('boards').update({_id: mostRecentAction._id},{$addToSet : {points: {$each: points}}})
     } else {
@@ -66,7 +66,7 @@ io.sockets.on('connection', function (socket) {
   // on a join, add them to the right board and save that 
   // property on their socket.
   socket.on('join', function(data) {
-    db.collection('boards').find({name: data.board}).sort({time: -1}).toArray(function(err, actions) {
+    db.collection('boards').find({name: data.board}).sort({time: 1}).toArray(function(err, actions) {
       if (actions.length == 0) {
         socket.emit('draw', {points:[]})
       }
