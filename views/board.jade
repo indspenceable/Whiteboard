@@ -59,16 +59,20 @@ html(lang="en")
         context.fillStyle = '#fff'
         context.fillRect(point.x-RAD/2, point.y-RAD/2,RAD,RAD)
       }
+      function windowResize() {
+        canvasOffsetX = canvas.offset().left
+        canvasOffsetY = canvas.offset().top
+      }
+      $(window).resize(windowResize);
       
       function showCanvas(points) {
+        shown = true
+        context.fillStyle = '#fff'
+        context.fillRect(0,0, 940, 500);
+        points.forEach(draw)
         $('.loading').hide(1000, function(){
           $('.canvas').show(1000)
-          canvasOffsetX = canvas.offset().left
-          canvasOffsetY = canvas.offset().top
-          shown = true
-          context.fillStyle = '#fff'
-          context.fillRect(0,0, canvas.width(), canvas.height());
-          points.forEach(draw)
+          windowResize()
         })
       }
       
@@ -136,7 +140,7 @@ html(lang="en")
     .container
       h1 #{title}
       .canvas(style="display: none")
-        .mode(style="display: none")
+        .mode
           span.draw Drawing
           span.erase(style="display:none") Erasing
           &nbsp;

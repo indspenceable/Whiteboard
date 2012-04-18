@@ -4,12 +4,16 @@ var express = require('express')
 , io = io.listen(app);
 io.set('log level', 1);
 app.use(express.static("./public"))
+
+
+
 // Set up the db
 var mongo = require('mongoskin');
 var dbUrl = process.env.MONGOLAB_URI || 'mongodb://localhost:27017/test?auto_reconnect'
 
 var db = mongo.db(dbUrl);
 db.collection('points').ensureIndex({board:1});
+
 
 io.configure(function () { 
   io.set("transports", ["xhr-polling"]); 
@@ -34,31 +38,40 @@ app.get('/:board', function(req,res) {
 
 app.listen(process.env.PORT || 5656);
 
-function insertPoints(board, rawPoints) {
+
+function updateLatestEntry(board, rawPoints, verb) {
   var points = rawPoints.map(function(rawPoint){
-    return {x: Math.floor(rawPoint.x), y: Math.floor(rawPoint.y), board: board}
+    return {x: Math.floor(rawPoint.x), y: Math.floor(rawPoint.y)}
   })
-  db.collection('points').remove(points)
-  db.collection('points').save(points)
+  // Find the latest action on the db
+  db.collection('boards').find({name: board}).sort({time: -1}).nextObject(function(err,mostRecentAction) {
+    if (mostRecentAction && mostRecentAction.verb == verb) {
+      db.collection('boards').update({_id: mostRecentAction._id},{$addToSet : {points: {$each: points}}})
+    } else {
+      db.collection('boards').save({verb:verb, name: board, time: (new Date()).getTime(), points: points})
+    }
+  })
+}
+
+function insertPoints(board, rawPoints) {
+  updateLatestEntry(board, rawPoints, 'draw')
 }
 function removePoints(board, rawPoints) {
-  rawPoints.forEach(function(rawPoint){
-    var x = Math.floor(rawPoint.x)
-    var y = Math.floor(rawPoint.y)
-    db.collection('points').remove({x: {$lt: x+2, $gt: x-2}, y:{$lt: y+2, $gt: y-2}, board: board})
-  }) 
+  updateLatestEntry(board, rawPoints, 'erase')
 }
 function removeAllPoints(board) {
-  db.collection('points').remove({board: board})
+  db.collection('boards').remove({name: board})
 }
 
 io.sockets.on('connection', function (socket) {
   // on a join, add them to the right board and save that 
   // property on their socket.
   socket.on('join', function(data) {
-    db.collection('points').find({board: data.board}).toArray(function(err, points) {
-      socket.emit('draw', {
-        points: points
+    db.collection('boards').find({name: data.board}).toArray(function(err, actions) {
+      actions.forEach(function(action) {
+        socket.emit(action.verb, {
+          points: action.points
+        })
       })
       socket.set('board', data.board)
       socket.join(data.board)
