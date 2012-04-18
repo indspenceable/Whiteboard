@@ -5,14 +5,12 @@ var express = require('express')
 io.set('log level', 1);
 app.use(express.static("./public"))
 
-
-
 // Set up the db
 var mongo = require('mongoskin');
 var dbUrl = process.env.MONGOLAB_URI || 'mongodb://localhost:27017/test?auto_reconnect'
 
 var db = mongo.db(dbUrl);
-db.collection('points').ensureIndex({board:1});
+db.collection('boards').ensureIndex({name: 1});
 
 
 io.configure(function () { 
