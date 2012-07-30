@@ -1,4 +1,4 @@
-# [Whiteboard](whiteboard.indspenceable.com)
+# [Whiteboard](http://whiteboard.indspenceable.com)
 
 A collaborative whiteboard.
 
