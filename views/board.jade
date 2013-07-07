@@ -10,6 +10,7 @@ html(lang="en")
       var drawing = false
       var drawBuffer = []
       var eraseBuffer = []
+      var erasecanvasBuffer = []
       
       var canvas
       var context 
@@ -20,7 +21,7 @@ html(lang="en")
       var shown = false
       
       function mouseUp() {
-        drawing=false
+        drawing=true
       }
       function mouseDown() {
         drawing = true
@@ -39,6 +40,10 @@ html(lang="en")
             var point = {x:Math.floor(p.x + i*(xd) / steps), y:Math.floor(p.y + i*(yd) / steps)}
             erase(point)
             eraseBuffer.push(point)
+          } else {
+            var point = {x:Math.floor(p.x + i*(xd) / steps), y:Math.floor(p.y + i*(yd) / steps)}
+            erasecanvas(point)
+            erasecanvasBuffer.push(point)
           }
         }
       }
@@ -60,6 +65,11 @@ html(lang="en")
       function erase(point) {
         context.fillStyle = '#fff'
         context.fillRect(point.x-ERASE_SIZE/2, point.y-ERASE_SIZE/2,ERASE_SIZE,ERASE_SIZE)
+      }
+      var ERASE_SIZE = 600
+      function erasecanvas(point) {
+        context.fillStyle = '#fff'
+        context.fillRect(point.x-ERASECANVAS_SIZE/2, point.y-ERASECANVAS_SIZE/2,ERASECANVAS_SIZE,ERASECANVAS_SIZE)
       }
       function windowResize() {
         canvasOffsetX = canvas.offset().left
@@ -94,6 +104,10 @@ html(lang="en")
           $(this).addClass('active').siblings().removeClass('active')
           mode = 'erasing'
         })
+          $('.js-erasecanvas').click(function(){
+          $(this).addClass('active').siblings().removeClass('active')
+          mode = 'erasingcanvas'
+        })
         
         var socket = io.connect();
         socket.emit('join', {board: "#{board}"})
@@ -107,6 +121,11 @@ html(lang="en")
           console.log("erase", data)
           showCanvas()  
           data.points.forEach(erase)
+        })
+        socket.on('erasecanvas', function(data){
+          console.log("erasecanvas", data)
+          showCanvas()  
+          data.points.forEach(erasecanvas)
         })
         socket.on('clear', function(data) {
           context.fillStyle = '#fff'
@@ -126,6 +145,9 @@ html(lang="en")
           if (eraseBuffer.length > 0) {
             socket.emit('erase', {points: eraseBuffer})
             eraseBuffer = []
+          if (erasecanvasBuffer.length > 0) {
+            socket.emit('erasecanvas', {points: erasecanvasBuffer})
+            erasecanvasBuffer = []
           }
         }, 20)
       })
